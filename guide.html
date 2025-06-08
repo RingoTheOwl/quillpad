@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<title>Telegram-бот + Gemini-API через Zapier (повний гайд)</title>
+<style>
+  body{font-family:system-ui,Arial,sans-serif;line-height:1.55;margin:0;padding:2rem;background:#fafafa;color:#222}
+  h1{margin-top:0;font-size:2rem}
+  h2{margin-top:2rem;color:#004b8d}
+  table{width:100%;border-collapse:collapse;margin:1rem 0}
+  th,td{border:1px solid #ccc;padding:.4rem;text-align:left;vertical-align:top}
+  th{background:#e9f4ff}
+  code{background:#f3f3f3;padding:.15em .35em;border-radius:4px;font-family:Menlo,Consolas,monospace}
+  .ok{color:#038c3e;font-weight:600}
+  .warn{color:#c00;font-weight:600}
+</style>
+</head>
+<body>
+
+<h1>Повний гайд: «Telegram-бот + Gemini через Zapier»</h1>
+
+<p><strong>Стек:</strong> Telegram Bot API (безкоштовно) • Google Gemini API (AI Studio, free key) • Zapier Free Plan.</p>
+
+<h2 id="req">0. Вимоги</h2>
+<table>
+<tr><th>Що потрібно</th><th>Де взяти</th></tr>
+<tr><td>Telegram-акаунт</td><td><a href="https://telegram.org">telegram.org</a></td></tr>
+<tr><td>Google-акаунт</td><td>будь-який Gmail</td></tr>
+<tr><td>Zapier-акаунт</td><td><a href="https://zapier.com">zapier.com</a></td></tr>
+<tr><td>Браузер з доступом до <a href="https://aistudio.google.com">AI Studio</a></td><td>Chrome / Edge</td></tr>
+</table>
+
+<h2 id="bot">1. Реєструємо бота в @BotFather</h2>
+<ol>
+<li><code>/newbot</code> → ім’я та <code>@username</code>.</li>
+<li>Копіюємо <strong>токен</strong> HTTP (<code>123456:AA…</code>).</li>
+<li><code>/setprivacy</code> → <strong>Disable</strong>.</li>
+</ol>
+
+<h2 id="gemini">2. Отримуємо API-ключ Gemini</h2>
+<ol>
+<li>Відкрити <a href="https://aistudio.google.com">Google AI Studio</a>.</li>
+<li><em>API keys → Create API key</em>. Вибрати проєкт <code>gen-lang-client-…</code>.</li>
+<li>Скопіювати ключ — відображається 1 раз!</li>
+</ol>
+
+<h2 id="zap">3. Створюємо Zap</h2>
+
+<h3>3.1&nbsp;Trigger — Telegram → New Message</h3>
+<ul>
+<li><strong>Account</strong>: підключити токен.</li>
+<li><strong>Chat ID</strong>: <em>залишити порожнім</em> — ловить усі чати.</li>
+</ul>
+
+<h3>3.2&nbsp;Filter — Filter by Zapier</h3>
+<pre><code>From Is Bot   —  Is  —  false</code></pre>
+
+<h3>3.3&nbsp;Action — Google AI Studio (Gemini) → Send Prompt</h3>
+<ul>
+<li>Model: <code>gemini-1.5-flash</code> (або <code>gemini-1.0-pro</code>)</li>
+<li>System Instructions: <em>You are a Ukrainian fintech assistant…</em></li>
+<li>Prompt: змінна <code>{{1__text}}</code> із кроку 1.</li>
+<li>Temperature: 0.5</li>
+</ul>
+
+<h3>3.4&nbsp;Action — Telegram → Send Message</h3>
+<ul>
+<li>Chat ID: <code>{{1__chat_id}}</code></li>
+<li>Text:&nbsp;<code>{{3__candidates_0_content_parts_0_text}}</code></li>
+</ul>
+
+<h2 id="publish">4. Публікуємо й тестуємо</h2>
+<ol>
+<li><strong>Publish → Turn on Zap</strong>.</li>
+<li>У чаті з ботом: «<em>Як розрахувати платіж 10 000₴ на 6 міс. під 3 %</em>».</li>
+<li>Отримуємо відповідь за 1–2 сек.</li>
+</ol>
+
+<h2 id="errors">5. Типові помилки й вирішення</h2>
+<table>
+<tr><th>Симптом</th><th>Причина</th><th>Рішення</th></tr>
+<tr><td>Telegram error «can’t use getUpdates…»</td><td>Старий webhook</td><td><code>/deleteWebhook?drop_pending_updates=true</code></td></tr>
+<tr><td>Zap runs порожній</td><td>У Trigger вказано демо-рядок Chat ID</td><td>Очистити поле Chat ID</td></tr>
+<tr><td>Бот відповідає «Okay, what’s your question?»</td><td>Фіксований Prompt</td><td>Підставити <code>{{1__text}}</code></td></tr>
+</table>
+
+<h2 id="check">6. Чек-лист фінальної перевірки</h2>
+<ul>
+<li class="ok">/start відповідає системним промптом.</li>
+<li class="ok">Бот мовчить на власні повідомлення.</li>
+<li class="ok">У Zap History — лише Success-запуски.</li>
+<li class="ok"><code>getWebhookInfo</code> — один URL від Zapier.</li>
+</ul>
+
+<h2 id="future">7. Ідеї покращень</h2>
+<ol>
+<li>Логування у Google Sheets.</li>
+<li>Команди <code>/help</code>, <code>/rate</code> без LLM-виклику.</li>
+<li>RAG — підвантажити власні PDF / CSV.</li>
+<li>Делай-крок <em>Delay 1 s</em> для великих чатів.</li>
+</ol>
+
+<hr>
+<p style="font-size:.85rem;color:#666">© 2025 Guide by ChatGPT • Стек: Telegram Bot API · Google Gemini API · Zapier Free Plan</p>
+
+</body>
+</html>
